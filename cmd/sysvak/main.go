@@ -14,13 +14,13 @@ import (
 )
 
 var opt struct {
-	From           string   `short:"b" long:"from"   description:"From date"`
-	To             string   `short:"e" long:"to"     description:"To date"`
-	Doses          []string `short:"d" long:"dose"   description:"Which doeses"  default:"01,02"`
-	Municipalities []string `short:"m" long:"mu"     description:"Municipality code"`
+	From           string   `short:"b" long:"from"   description:"From date (defaults to 1 week ago)"`
+	To             string   `short:"e" long:"to"     description:"To date (defaults to now)"`
+	Doses          []string `short:"d" long:"dose"   description:"Which doeses"  choice:"01" choice:"02" default:"01,02"`
+	Municipalities []string `short:"m" long:"mu"     description:"Municipality code(s)"`
 	Genders        []string `short:"g" long:"gender" description:"Genders"       default:"M,K"`
-	Ages           []string `short:"a" long:"age"    description:"Age ranges"    default:"1,2,3,4,5,6,7"`
-	Format         string   `short:"f" long:"format" description:"Output format" default:"table"`
+	Ages           []string `short:"a" long:"age"    description:"Age ranges, comma separated" default:"1,2,3,4,5,6,7"`
+	Format         string   `short:"f" long:"format" description:"Output format" choice:"json" choice:"csv" choice:"table" default:"table"`
 }
 
 func main() {

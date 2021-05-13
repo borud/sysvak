@@ -14,13 +14,13 @@ import (
 )
 
 var opt struct {
-	From           string   `short:"b" long:"from"   description:"From date (defaults to 1 week ago)"`
-	To             string   `short:"e" long:"to"     description:"To date (defaults to now)"`
-	Doses          []string `short:"d" long:"dose"   description:"Which doeses"  choice:"01" choice:"02" default:"01,02"`
-	Municipalities []string `short:"m" long:"mu"     description:"Municipality code(s)"`
+	From           string   `short:"f" long:"from"   description:"From date (defaults to 1 week ago)"`
+	To             string   `short:"t" long:"to"     description:"To date (defaults to now)"`
+	Doses          []string `short:"d" long:"dose"   description:"Which doeses"  default:"01,02"`
+	Municipalities []string `short:"m" long:"municipality"     description:"Municipality code(s)"`
 	Genders        []string `short:"g" long:"gender" description:"Genders"       default:"M,K"`
 	Ages           []string `short:"a" long:"age"    description:"Age ranges, comma separated" default:"1,2,3,4,5,6,7"`
-	Format         string   `short:"f" long:"format" description:"Output format" choice:"json" choice:"csv" choice:"table" default:"table"`
+	Format         string   `short:"o" long:"output" description:"Output format" choice:"json" choice:"csv" choice:"table" default:"table"`
 }
 
 func main() {
@@ -78,6 +78,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
+
+	log.Printf("date range %s to %s", from.Format("2006-01-02"), to.Format("2006-01-02"))
 
 	switch strings.ToLower(opt.Format) {
 	case "json":

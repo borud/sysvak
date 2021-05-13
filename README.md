@@ -2,7 +2,13 @@
 
 Simple utility for digging out vaccine data from SYSVAK.
 
-````text
+## Install
+
+    go get -u github.com/borud/sysvak/cmd/sysvak
+
+## Command line options
+
+```
 Usage:
   sysvak [OPTIONS]
 

@@ -21,6 +21,7 @@ var opt struct {
 	Genders        []string `short:"g" long:"gender" description:"Genders"       default:"M,K"`
 	Ages           []string `short:"a" long:"age"    description:"Age ranges, comma separated" default:"1,2,3,4,5,6,7"`
 	Format         string   `short:"o" long:"output" description:"Output format" choice:"json" choice:"csv" choice:"table" default:"table"`
+	Verbose        bool     `short:"v" description:"Verbose mode"`
 }
 
 func main() {
@@ -74,12 +75,20 @@ func main() {
 		Ages:           opt.Ages,
 	}
 
+	if opt.Verbose {
+		log.Printf("URL = %s", q.AsURL())
+	}
+
 	r, err := sysvak.Lookup(q)
 	if err != nil {
 		log.Fatalf("Error: %v", err)
 	}
 
-	log.Printf("date range %s to %s", from.Format("2006-01-02"), to.Format("2006-01-02"))
+	fmt.Printf("\nFrom %s\nTo   %s (%d days)\n",
+		from.Format("2006-01-02 (Monday)"),
+		to.Format("2006-01-02 (Monday) "),
+		int(to.Sub(from).Hours()/24),
+	)
 
 	switch strings.ToLower(opt.Format) {
 	case "json":

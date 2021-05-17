@@ -106,11 +106,14 @@ func printCSV(results []sysvak.Result) {
 }
 
 func printTable(results []sysvak.Result) {
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 5, ' ', tabwriter.DiscardEmptyColumns)
+	sum := 0
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 5, ' ', 0)
 	fmt.Println()
-	fmt.Fprintf(w, "%s\t%s\t%s\n", "DESCRIPTION", "WHERE", "COUNT")
+	fmt.Fprintf(w, "%s\t%s\t%s\n", "DESCRIPTION", "WHERE", " COUNT")
 	for _, r := range results {
-		fmt.Fprintf(w, "%s\t%s\t%d\n", r.Description, r.Where, r.Count)
+		fmt.Fprintf(w, "%s\t%s\t%6d\n", r.Description, r.Where, r.Count)
+		sum += int(r.Count)
 	}
+	fmt.Fprintf(w, "SUM\t%s\t%6d\n\n", "", sum)
 	w.Flush()
 }

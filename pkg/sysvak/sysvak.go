@@ -15,6 +15,16 @@ func Lookup(q Query) ([]Result, error) {
 	}
 	defer r.Body.Close()
 
-	var result []Result
-	return result, json.NewDecoder(r.Body).Decode(&result)
+	var rawResult []RawResult
+	err = json.NewDecoder(r.Body).Decode(&rawResult)
+	if err != nil {
+		return nil, err
+	}
+
+	var result = make([]Result, len(rawResult))
+	for n, rr := range rawResult {
+		result[n] = rr.Parse()
+	}
+
+	return result, nil
 }

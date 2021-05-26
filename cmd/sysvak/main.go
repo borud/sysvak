@@ -9,8 +9,10 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/borud/sysvak/pkg/sysvak"
+	"github.com/bradfitz/slice"
 	"github.com/jessevdk/go-flags"
+
+	"github.com/borud/sysvak/pkg/sysvak"
 )
 
 var opt struct {
@@ -39,7 +41,7 @@ func main() {
 	}
 
 	if len(opt.Ages) != 0 && opt.Ages[0] == "?" {
-		for k, v := range sysvak.AgeRange {
+		for k, v := range sysvak.AgeRangeToString {
 			fmt.Printf("%d - %s\n", k, v)
 		}
 		return
@@ -84,7 +86,7 @@ func main() {
 		log.Fatalf("Error: %v", err)
 	}
 
-	fmt.Printf("\nFrom %s\nTo   %s (%d days)\n",
+	fmt.Printf("\nFrom %s\nTo   %s (%d days)\n\n",
 		from.Format("2006-01-02 (Monday)"),
 		to.Format("2006-01-02 (Monday) "),
 		int(to.Sub(from).Hours()/24),
@@ -109,20 +111,29 @@ func printJSON(results []sysvak.Result) {
 }
 
 func printCSV(results []sysvak.Result) {
+	fmt.Printf("%s,%s,%s,%s\n", "AGE", "DOSE", "GENDER", "COUNT")
 	for _, r := range results {
-		fmt.Printf("%s;%s;%d\n", r.Description, r.Where, r.Count)
+		fmt.Printf("\"%s\",%d,\"%s\",%d\n", sysvak.AgeRangeToString[r.Age], r.Dose, sysvak.GenderToString[r.Gender], r.Count)
 	}
 }
 
 func printTable(results []sysvak.Result) {
 	sum := 0
+
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 5, ' ', 0)
+
 	fmt.Println()
-	fmt.Fprintf(w, "%s\t%s\t%s\n", "DESCRIPTION", "WHERE", " COUNT")
+	fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", "AGE", "DOSE", "GENDER", "COUNT")
+
+	slice.Sort(results, func(i, j int) bool {
+		return results[i].Age < results[j].Age
+	})
+
 	for _, r := range results {
-		fmt.Fprintf(w, "%s\t%s\t%6d\n", r.Description, r.Where, r.Count)
+		fmt.Fprintf(w, "%s\t%d\t%s\t%6d\n", sysvak.AgeRangeToString[r.Age], r.Dose, sysvak.GenderToString[r.Gender], r.Count)
 		sum += int(r.Count)
 	}
+
 	fmt.Fprintf(w, "SUM\t%s\t%6d\n\n", "", sum)
 	w.Flush()
 }

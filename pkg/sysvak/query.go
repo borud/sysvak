@@ -16,17 +16,6 @@ type Query struct {
 	Ages           []string
 }
 
-// AgeRange ...
-var AgeRange = map[int]string{
-	1: "0-15",
-	2: "16-44",
-	3: "45-54",
-	4: "55-64",
-	5: "65-74",
-	6: "75-84",
-	7: "> 85",
-}
-
 // NewQuery creates a new query with reasonable defaults
 func NewQuery() Query {
 	return Query{

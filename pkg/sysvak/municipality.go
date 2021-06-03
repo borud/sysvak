@@ -39,7 +39,7 @@ func init() {
 		}
 
 		code := rec[0]
-		name := rec[3]
+		name := rec[1]
 
 		MunicipalityByCode[code] = Municipality{
 			Code: code,

@@ -9,7 +9,11 @@ const baseURL = "https://statistikk.fhi.no/api/Sysvak/gruppering"
 
 // Lookup ...
 func Lookup(q Query) ([]Result, error) {
-	r, err := http.Get(q.AsURL())
+	url, err := q.AsURL()
+	if err != nil {
+		return []Result{}, err
+	}
+	r, err := http.Get(url)
 	if err != nil {
 		return []Result{}, err
 	}

@@ -5,25 +5,27 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 	"strings"
 	"text/tabwriter"
 	"time"
 
-	"github.com/bradfitz/slice"
 	"github.com/jessevdk/go-flags"
 
 	"github.com/borud/sysvak/pkg/sysvak"
 )
 
 var opt struct {
-	From           string   `short:"f" long:"from"   description:"From date (defaults to 1 week ago)"`
-	To             string   `short:"t" long:"to"     description:"To date (defaults to now)"`
-	Doses          []string `short:"d" long:"dose"   description:"Which doeses"  default:"01,02"`
-	Municipalities []string `short:"m" long:"municipality"     description:"Municipality code(s)"`
-	Genders        []string `short:"g" long:"gender" description:"Genders"       default:"M,K"`
-	Ages           []string `short:"a" long:"age"    description:"Age ranges, comma separated" default:"1,2,3,4,5,6,7"`
-	Format         string   `short:"o" long:"output" description:"Output format" choice:"json" choice:"csv" choice:"table" default:"table"`
-	Verbose        bool     `short:"v" description:"Verbose mode"`
+	From               string `short:"f" long:"from"   description:"from date (defaults to 1 week ago)"`
+	To                 string `short:"t" long:"to"     description:"to date (defaults to now)"`
+	Doses              string `short:"d" long:"dose"   description:"which doeses"  default:"1,2"`
+	Municipalities     string `short:"m" long:"municipality"     description:"Municipality code(s)"`
+	Genders            string `short:"g" long:"gender" description:"genders" default:"M,K"`
+	Ages               string `short:"a" long:"age"    description:"age ranges, comma separated" default:"1,2,3,4,5,6,7"`
+	Format             string `short:"o" long:"output" description:"output format" choice:"json" choice:"csv" choice:"table" default:"table"`
+	ListMunicipalities bool   `short:"l" long:"list-muni" description:"list municipality codes"`
+	ListAges           bool   `short:"x" long:"list-ages" description:"list age ranges"`
+	Verbose            bool   `short:"v" description:"Verbose mode"`
 }
 
 func main() {
@@ -33,14 +35,14 @@ func main() {
 		return
 	}
 
-	if len(opt.Municipalities) != 0 && opt.Municipalities[0] == "?" {
+	if opt.ListMunicipalities {
 		for k, v := range sysvak.MunicipalityByCode {
 			fmt.Printf("%s - %s\n", k, v.Name)
 		}
 		return
 	}
 
-	if len(opt.Ages) != 0 && opt.Ages[0] == "?" {
+	if opt.ListAges {
 		for k, v := range sysvak.AgeRangeToString {
 			fmt.Printf("%d - %s\n", k, v)
 		}
@@ -48,7 +50,9 @@ func main() {
 	}
 
 	if len(opt.Municipalities) == 0 {
-		log.Fatal("Please list what municipalities you want data for")
+		log.Print("Please list what municipalities you want data for")
+		log.Print("(to list municipalities run with -l or --list-muni)")
+		return
 	}
 
 	var from = time.Now().Add(-7 * 24 * time.Hour)
@@ -71,14 +75,15 @@ func main() {
 	q := sysvak.Query{
 		From:           from,
 		To:             to,
-		Doses:          opt.Doses,
-		Municipalities: opt.Municipalities,
-		Genders:        opt.Genders,
-		Ages:           opt.Ages,
+		Doses:          strings.Split(opt.Doses, ","),
+		Municipalities: strings.Split(opt.Municipalities, ","),
+		Genders:        strings.Split(opt.Genders, ","),
+		Ages:           strings.Split(opt.Ages, ","),
 	}
 
 	if opt.Verbose {
-		log.Printf("URL = %s", q.AsURL())
+		url, err := q.AsURL()
+		log.Printf("URL = %s %v", url, err)
 	}
 
 	r, err := sysvak.Lookup(q)
@@ -125,7 +130,7 @@ func printTable(results []sysvak.Result) {
 	fmt.Println()
 	fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", "AGE", "DOSE", "GENDER", "COUNT")
 
-	slice.Sort(results, func(i, j int) bool {
+	sort.Slice(results, func(i, j int) bool {
 		return results[i].Age < results[j].Age
 	})
 

@@ -136,15 +136,16 @@ func printTable(results []sysvak.Result, from time.Time, to time.Time) {
 	}
 
 	t.SetTitle("Covid-19 vaccines\nfrom %s\nto %s (%d days)",
+
 		from.Format("2006-01-02"),
 		to.Format("2006-01-02"),
 		int(to.Sub(from).Hours()/24))
 
-	t.AppendHeader(table.Row{"Age", "Dose", "Gender", "Count"})
+	t.AppendHeader(table.Row{"Age", "Municipality", "Dose", "Gender", "Count"})
 
 	for _, r := range results {
 		t.AppendRow([]interface{}{
-			sysvak.AgeRangeToString[r.Age], r.Dose, sysvak.GenderToString[r.Gender], r.Count,
+			sysvak.AgeRangeToString[r.Age], r.Where, r.Dose, sysvak.GenderToString[r.Gender], r.Count,
 		})
 		sum += int(r.Count)
 	}

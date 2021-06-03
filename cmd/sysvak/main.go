@@ -92,6 +92,25 @@ func main() {
 		log.Fatalf("Error: %v", err)
 	}
 
+	sort.Slice(r, func(i, j int) bool {
+		ageComp := r[i].Age - r[j].Age
+		switch {
+		case ageComp < 0:
+			return true
+		case ageComp > 0:
+			return false
+		}
+
+		genderComp := r[i].Gender - r[j].Gender
+		switch genderComp {
+		case -1:
+			return true
+		case 1:
+			return false
+		}
+		return r[i].Dose < r[j].Dose
+	})
+
 	switch strings.ToLower(opt.Format) {
 	case "json":
 		printJSON(r)
@@ -124,10 +143,6 @@ func printCSV(results []sysvak.Result) {
 func printTable(results []sysvak.Result, from time.Time, to time.Time) {
 	sum := 0
 
-	sort.Slice(results, func(i, j int) bool {
-		return results[i].Age < results[j].Age
-	})
-
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 	t.SetIndexColumn(1)
@@ -136,17 +151,22 @@ func printTable(results []sysvak.Result, from time.Time, to time.Time) {
 	}
 
 	t.SetTitle("Covid-19 vaccines\nfrom %s\nto %s (%d days)",
-
 		from.Format("2006-01-02"),
 		to.Format("2006-01-02"),
 		int(to.Sub(from).Hours()/24))
 
 	t.AppendHeader(table.Row{"Age", "Municipality", "Dose", "Gender", "Count"})
 
+	lastAge := 0
 	for _, r := range results {
+		age := sysvak.AgeRangeToString[r.Age]
+		if r.Age == lastAge {
+			age = ""
+		}
 		t.AppendRow([]interface{}{
-			sysvak.AgeRangeToString[r.Age], r.Where, r.Dose, sysvak.GenderToString[r.Gender], r.Count,
+			age, r.Where, r.Dose, sysvak.GenderToString[r.Gender], r.Count,
 		})
+		lastAge = r.Age
 		sum += int(r.Count)
 	}
 

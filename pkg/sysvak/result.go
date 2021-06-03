@@ -8,11 +8,11 @@ import (
 // RawResult ...
 type RawResult struct {
 	Description string    `json:"tekst"`
-	Count       int64     `json:"antall"`
+	Count       int       `json:"antall"`
 	Where       string    `json:"fordeltPaa,omitempty"`
-	Order       int64     `json:"rekkefolge,omitempty"`
+	Order       int       `json:"rekkefolge,omitempty"`
 	Date        time.Time `json:"provedato,omitempty"`
-	Month       int64     `json:"manedNr,omitempty"`
+	Month       int       `json:"manedNr,omitempty"`
 }
 
 // Result ...
@@ -23,9 +23,9 @@ type Result struct {
 	Age         int
 	Where       string
 	Date        time.Time
-	Order       int64
-	Month       int64
-	Count       int64
+	Order       int
+	Month       int
+	Count       int
 }
 
 // Parse and return normalized result

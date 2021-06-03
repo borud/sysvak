@@ -7,9 +7,9 @@ import (
 	"os"
 	"sort"
 	"strings"
-	"text/tabwriter"
 	"time"
 
+	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jessevdk/go-flags"
 
 	"github.com/borud/sysvak/pkg/sysvak"
@@ -22,7 +22,8 @@ var opt struct {
 	Municipalities     string `short:"m" long:"municipality"     description:"Municipality code(s)"`
 	Genders            string `short:"g" long:"gender" description:"genders" default:"M,K"`
 	Ages               string `short:"a" long:"age"    description:"age ranges, comma separated" default:"1,2,3,4,5,6,7"`
-	Format             string `short:"o" long:"output" description:"output format" choice:"json" choice:"csv" choice:"table" default:"table"`
+	Format             string `short:"o" long:"output" description:"output format" choice:"json" choice:"csv" choice:"table" choice:"markdown" choice:"html" default:"table"`
+	NoColor            bool   `short:"n" long:"no-color" description:"turn off colors in table output"`
 	ListMunicipalities bool   `short:"l" long:"list-muni" description:"list municipality codes"`
 	ListAges           bool   `short:"x" long:"list-ages" description:"list age ranges"`
 	Verbose            bool   `short:"v" description:"Verbose mode"`
@@ -91,19 +92,17 @@ func main() {
 		log.Fatalf("Error: %v", err)
 	}
 
-	fmt.Printf("\nFrom %s\nTo   %s (%d days)\n\n",
-		from.Format("2006-01-02 (Monday)"),
-		to.Format("2006-01-02 (Monday) "),
-		int(to.Sub(from).Hours()/24),
-	)
-
 	switch strings.ToLower(opt.Format) {
 	case "json":
 		printJSON(r)
 	case "csv":
 		printCSV(r)
 	case "table":
-		printTable(r)
+		printTable(r, from, to)
+	case "markdown":
+		printTable(r, from, to)
+	case "html":
+		printTable(r, from, to)
 	default:
 		log.Printf("unknown output '%s'", opt.Format)
 	}
@@ -122,23 +121,46 @@ func printCSV(results []sysvak.Result) {
 	}
 }
 
-func printTable(results []sysvak.Result) {
+func printTable(results []sysvak.Result, from time.Time, to time.Time) {
 	sum := 0
-
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 5, ' ', 0)
-
-	fmt.Println()
-	fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", "AGE", "DOSE", "GENDER", "COUNT")
 
 	sort.Slice(results, func(i, j int) bool {
 		return results[i].Age < results[j].Age
 	})
 
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.SetIndexColumn(1)
+	if !opt.NoColor {
+		t.SetStyle(table.StyleColoredBlackOnRedWhite)
+	}
+
+	t.SetTitle("Covid-19 vaccines\nfrom %s\nto %s (%d days)",
+		from.Format("2006-01-02"),
+		to.Format("2006-01-02"),
+		int(to.Sub(from).Hours()/24))
+
+	t.AppendHeader(table.Row{"Age", "Dose", "Gender", "Count"})
+
 	for _, r := range results {
-		fmt.Fprintf(w, "%s\t%d\t%s\t%6d\n", sysvak.AgeRangeToString[r.Age], r.Dose, sysvak.GenderToString[r.Gender], r.Count)
+		t.AppendRow([]interface{}{
+			sysvak.AgeRangeToString[r.Age], r.Dose, sysvak.GenderToString[r.Gender], r.Count,
+		})
 		sum += int(r.Count)
 	}
 
-	fmt.Fprintf(w, "SUM\t%s\t%6d\n\n", "", sum)
-	w.Flush()
+	t.AppendSeparator()
+	t.AppendFooter(table.Row{"", "", "Total", sum})
+
+	switch opt.Format {
+	case "html":
+		t.RenderHTML()
+	case "markdown":
+		t.RenderMarkdown()
+	default:
+		fmt.Println()
+		t.Render()
+		fmt.Println()
+	}
+
 }

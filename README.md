@@ -1,6 +1,6 @@
 # sysvak
 
-Simple utility for digging out vaccine data from SYSVAK.
+Simple utility for digging out Covid-19 vaccine data for Norway from SYSVAK.  I wrote this because I wanted something that was quick and easy and allowed me to pipe data into other applications.
 
 ## Install
 
@@ -9,20 +9,23 @@ Simple utility for digging out vaccine data from SYSVAK.
 ## Command line options
 
 ```
+$ bin/sysvak -h
 Usage:
   sysvak [OPTIONS]
 
 Application Options:
-  -b, --from=                   From date (defaults to 1 week ago)
-  -e, --to=                     To date (defaults to now)
-  -d, --dose=[01|02]            Which doeses (default: 01,02)
-  -m, --mu=                     Municipality code(s)
-  -g, --gender=                 Genders (default: M,K)
-  -a, --age=                    Age ranges, comma separated (default: 1,2,3,4,5,6,7)
-  -f, --format=[json|csv|table] Output format (default: table)
+  -f, --from=                                 from date (defaults to 1 week ago)
+  -t, --to=                                   to date (defaults to now)
+  -d, --dose=                                 which doeses (default: 1,2)
+  -m, --municipality=                         Municipality code(s)
+  -g, --gender=                               genders (default: M,K)
+  -a, --age=                                  age ranges, comma separated (default: 1,2,3,4,5,6,7)
+  -o, --output=[json|csv|table|markdown|html] output format (default: table)
+  -n, --no-color                              turn off colors in table output
+  -l, --list-muni                             list municipality codes
+  -x, --list-ages                             list age ranges
+  -v                                          Verbose mode
 
 Help Options:
-  -h, --help                    Show this help message
+  -h, --help                                  Show this help message
 ```
-
-To list municipalities use `-m ?` and to list age ranges `-a ?`.

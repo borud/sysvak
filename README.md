@@ -2,6 +2,8 @@
 
 Simple utility for digging out Covid-19 vaccine data for Norway from SYSVAK.  I wrote this because I wanted something that was quick and easy and allowed me to pipe data into other applications.
 
+![alt text](screenshot.png)
+
 ## Install
 
     go get -u github.com/borud/sysvak/cmd/sysvak
